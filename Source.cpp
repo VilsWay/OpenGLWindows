@@ -3,6 +3,7 @@
 #include "iostream"
 #include "WindowManager.h"
 #include "Triangle.h"
+#include "CubeData.h"
 #include "Shader.h"
 #include "TextureHandler.h"
 
@@ -23,13 +24,17 @@ int main()
     return -1;
   }
   glViewport(0, 0, 800, 600);
+  glEnable(GL_DEPTH_TEST);
   // 3. Initializing
   Triangle triangleObj;
+  CubeData cubeDataObj;
   unsigned int tVAO = triangleObj._getSimpleTriangleVAO();
   unsigned int tCVAO = triangleObj._getColorTriangleVAO();
   unsigned int texVAO = triangleObj._getTextureTriangleVAO();
+  unsigned int cubeVAO = cubeDataObj._getTexturedCubeVAO();
+
   // 4. Shader Init
-  Shader shaderProgram("VertexShaderTexture.txt", "FragmentShaderTexture.txt");
+  Shader shaderProgram("VertexShaderTextureCube.txt", "FragmentShaderTextureCube.txt");
 
   // Texture Generation
   TextureHandler t;
@@ -46,7 +51,7 @@ int main()
     
     // 2. Set Frame Color, Reset the color and other buffer
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
 
     glActiveTexture(GL_TEXTURE0);
@@ -54,8 +59,8 @@ int main()
 
     // 3. Actual Rendering
     shaderProgram.use();
-    glBindVertexArray(texVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(cubeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     //4. Frame ready swap the buffer.
     glfwSwapBuffers(wmInst->_getWindow());
