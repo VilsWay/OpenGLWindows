@@ -1,11 +1,21 @@
 #include "WindowManager.h"
 #include "GLFW/glfw3.h"
 #include "iostream"
+#include "Camera.h"
+#include "WindowManager.h"
 
 // set up static variables....
 WindowManager* WindowManager::_windowManager = nullptr;
 int WindowManager::_width = 0;
 int WindowManager::_height = 0;
+
+extern Camera camera;
+extern float lastX;
+extern float lastY;
+extern bool firstMouse;
+// timing
+extern float deltaTime;	// time between current frame and last frame
+extern float lastFrame;
 
 WindowManager::WindowManager(const char* windowName, int width, int height)
 {
@@ -19,6 +29,30 @@ void resizeCB(GLFWwindow* window, int width, int height)
   glViewport(0, 0, width, height);
   WindowManager::updateWidthHeight(width, height);
 }
+
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+  if (firstMouse)
+  {
+    lastX = xpos;
+    lastY = ypos;
+    firstMouse = false;
+  }
+
+  float xoffset = xpos - lastX;
+  float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+  lastX = xpos;
+  lastY = ypos;
+
+  camera.ProcessMouseMovement(xoffset, yoffset);
+}
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+  camera.ProcessMouseScroll(yoffset);
+}
+
 
 void WindowManager::_initWindow(const char* windowName)
 {
@@ -39,8 +73,15 @@ void WindowManager::_initWindow(const char* windowName)
     return;
   }
   glfwSetFramebufferSizeCallback(_window, resizeCB);
-}
+  //glfwSetCursorPosCallback(_window, mouse_callback);
+  glfwSetScrollCallback(_window, scroll_callback);
 
+ 
+  lastX = _width / 2.0f;
+  lastY = _height / 2.0f;
+  firstMouse = true;
+
+}
 
 
 void WindowManager::updateWidthHeight(int width, int height)
@@ -69,6 +110,15 @@ void WindowManager::ProcessInput()
 {
   if (glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(_window, true);
+
+  if (glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
+    camera.ProcessKeyboard(FORWARD, deltaTime);
+  if (glfwGetKey(_window, GLFW_KEY_S) == GLFW_PRESS)
+    camera.ProcessKeyboard(BACKWARD, deltaTime);
+  if (glfwGetKey(_window, GLFW_KEY_A) == GLFW_PRESS)
+    camera.ProcessKeyboard(LEFT, deltaTime);
+  if (glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
+    camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
 

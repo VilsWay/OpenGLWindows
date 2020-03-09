@@ -1,6 +1,12 @@
 #pragma once
 //class GLFWwindow; // forward declaration no use of complete type
 #include "GLFW/glfw3.h"
+#include "glm/glm.hpp"
+#include "Camera.h"
+
+
+
+
 class WindowManager
 {
 
